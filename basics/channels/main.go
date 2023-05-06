@@ -14,20 +14,23 @@ func (w *Worker) process(c chan int) {
 	for {
 		data := <-c
 		fmt.Printf("worker %d got %d\n", w.id, data)
+		time.Sleep(time.Millisecond * 100)
 	}
 }
 
 func main() {
-	fmt.Println("start")
 	c := make(chan int)
 	for i := 0; i < 5; i++ {
 		worker := &Worker{id: i}
 		go worker.process(c)
 	}
-	fmt.Println("middle")
 	for {
-		fmt.Println("Am here")
-		c <- rand.Int()
-		time.Sleep(time.Millisecond * 100)
+		select {
+		case c <- rand.Int():
+			//optional code
+		default:
+			fmt.Println("Dropped")
+		}
+		time.Sleep(time.Millisecond * 50)
 	}
 }
